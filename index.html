@@ -13,6 +13,11 @@
   #teacherBtn:hover { background: rgba(255,255,255,0.22); }
   #teacherBtn.on { background: #fff; color: #1f4e79; font-weight: 600; }
   .wait { color: #b26a00; font-weight: 600; font-size: 15px; }
+  #keyBox { position: absolute; right: 18px; top: 50%; transform: translateY(-50%); display: flex; gap: 6px; }
+  #keyBox input { width: 110px; padding: 7px 10px; border-radius: 6px; border: 1px solid rgba(255,255,255,0.4); background: rgba(255,255,255,0.12); color: #fff; font-size: 14px; }
+  #keyBox input::placeholder { color: rgba(255,255,255,0.7); }
+  #keyBox button { padding: 7px 12px; border-radius: 6px; border: 1px solid rgba(255,255,255,0.4); background: rgba(255,255,255,0.12); color: #fff; font-size: 14px; cursor: pointer; }
+  #keyMsg { position: absolute; right: 18px; bottom: 8px; font-size: 12px; color: #ffd8a8; }
   header h1 { font-size: 26px; letter-spacing: -0.5px; }
   header p { font-size: 15px; opacity: 0.85; margin-top: 2px; }
   .wrap { max-width: 1000px; margin: 24px auto; padding: 0 16px; }
@@ -53,6 +58,8 @@
   <h1>천안시 민원 게시판</h1>
   <p>시민 여러분의 불편을 듣고 함께 해결합니다</p>
   <button id="teacherBtn" onclick="toggleAnswers()">답변 보이기</button>
+  <div id="keyBox"><input id="keyInput" type="password" placeholder="답변 열쇠" onkeydown="if(event.key==='Enter')tryKey()"><button onclick="tryKey()">열기</button></div>
+  <div id="keyMsg"></div>
 </header>
 
 <div class="wrap">
@@ -134,12 +141,29 @@ const posts = [
   { no: 1079, area: "풍세면", title: "우리 마을에 젊은 사람들이 없어요", name: "장**", date: "2026.11.06", views: 102,
     body: "저는 풍세면에서 40년째 농사를 짓고 있는 주민입니다.\n\n예전에는 마을에 아이들 웃음소리가 가득했는데, 지금은 대부분 노인만 남았습니다. 일손이 모자라 농사를 짓기도 힘들고, 마을 초등학교도 학생이 줄어 걱정입니다.\n\n젊은 사람들은 일자리를 찾아 도시로 떠나고, 병원과 학원이 멀어 아이를 키우기 어렵다며 돌아오지 않습니다. 버스도 하루에 몇 번밖에 다니지 않습니다. 이대로 가면 마을을 지킬 사람이 없어질까 걱정입니다.",
     dept: "천안시 농촌 담당 부서", adate: "2026.11.16",
-    answer: "안녕하십니까. 소중한 의견 감사합니다.\n\n젊은 사람들이 농촌에 자리 잡을 수 있도록 농사 기술 교육과 정착 비용을 지원하는 사업을 하고 있습니다.\n\n또한 면 지역 버스를 더 자주 다니게 하는 방안을 교통 담당 부서와 협의하고, 의사와 간호사가 마을로 찾아가는 의료 서비스를 늘리겠습니다. 마을 주민들께서 마을 축제나 농촌 체험 프로그램을 함께 만들어 주시면 사람들이 마을을 찾는 데 큰 힘이 됩니다." }
+    answer: "안녕하십니까. 소중한 의견 감사합니다.\n\n젊은 사람들이 농촌에 자리 잡을 수 있도록 농사 기술 교육과 정착 비용을 지원하는 사업을 하고 있습니다.\n\n또한 면 지역 버스를 더 자주 다니게 하는 방안을 교통 담당 부서와 협의하고, 의사와 간호사가 마을로 찾아가는 의료 서비스를 늘리겠습니다. 마을 주민들께서 마을 축제나 농촌 체험 프로그램을 함께 만들어 주시면 사람들이 마을을 찾는 데 큰 힘이 됩니다." },
+  {"no": 1050, "area": "신방동", "title": "공원 옆 산책로에 가로등이 없어 밤길이 무서워요", "name": "문**", "date": "2026.10.16", "views": 87, "body": "저는 신방동에 사는 중학생의 엄마입니다.\n\n아이가 학원을 마치고 밤 9시쯤 근린공원 옆 산책로로 집에 오는데, 이 길에는 가로등이 거의 없어 깜깜합니다. 아이는 무서워서 한참을 돌아 큰길로 다닙니다. 저녁에 산책하는 어르신들도 발밑이 보이지 않아 넘어질까 걱정입니다.\n\n산책로를 만들 때 가로등은 충분히 세우지 않은 것 같습니다. 가로등을 설치해 주세요.", "dept": "천안시 도로 담당 부서", "adate": "2026.10.24", "answer": "안녕하십니까. 민원을 보내 주셔서 감사합니다.\n\n밤에 현장을 확인한 결과, 산책로 일부 구간이 어두워 걷는 사람의 안전이 걱정되는 것을 확인하였습니다.\n\n올해 안에 어두운 구간에 가로등을 더 세우겠습니다. 그 전까지는 경찰서와 협의하여 밤 시간 순찰을 늘리고, 비상벨이 달린 방범 카메라 설치도 검토하겠습니다."},
+  {"no": 1058, "area": "통정지구", "title": "출근 시간에 버스가 너무 늦게 와요", "name": "송**", "date": "2026.10.22", "views": 143, "body": "저는 통정지구에서 천안역 근처 회사로 출근하는 직장인입니다.\n\n통정지구에 아파트가 많이 생겨 사람이 크게 늘었는데, 이곳을 지나는 버스는 몇 대 되지 않습니다. 출근 시간에는 버스가 20분 넘게 오지 않고, 와도 사람이 꽉 차서 타지 못할 때가 많습니다. 학원에 가는 학생들도 자주 늦는다고 합니다.\n\n버스를 더 자주 다니게 해 주세요.", "dept": "천안시 교통 담당 부서", "adate": "2026.10.31", "answer": "안녕하십니까. 불편을 드려 죄송합니다.\n\n통정지구는 새 아파트 입주로 버스를 타는 사람이 크게 늘어난 것을 확인하였습니다.\n\n버스 회사와 협의하여 출퇴근 시간에 버스가 더 자주 다니도록 하겠습니다. 또한 통정지구와 천안역을 바로 잇는 새 버스 노선을 만드는 방안도 검토하겠습니다."},
+  {"no": 1066, "area": "신방동", "title": "버스 기사님이 너무 불친절해요", "name": "임**", "date": "2026.10.27", "views": 64, "body": "저는 신방동에 사는 주민입니다.\n\n오늘 아침 7시 40분쯤 ○○번 버스를 탔는데, 제가 교통카드를 늦게 찍었다고 기사님이 큰 소리로 화를 내셨습니다. 버스 안 사람들이 다 쳐다봐서 너무 창피하고 기분이 나빴습니다.\n\n그 기사님께 주의를 주세요.", "dept": "천안시 교통 담당 부서", "adate": "2026.10.29", "answer": "안녕하십니까. 불쾌한 일을 겪으셔서 죄송합니다.\n\n말씀하신 내용을 해당 버스 회사에 전달하여, 기사님께 승객을 친절하게 대하도록 교육하게 하였습니다."},
+  {"no": 1082, "area": "", "title": "우리 반이 시청 견학을 가고 싶어요", "name": "김**", "date": "2026.11.09", "views": 29, "body": "저는 초등학교 4학년입니다.\n\n사회 시간에 시청이 하는 일을 배웠는데, 우리 반 친구들과 시청에 직접 가 보고 싶습니다. 견학은 어떻게 신청하면 되나요?", "dept": "천안시 민원 담당 부서", "adate": "2026.11.10", "answer": "안녕하세요. 시청에 관심을 가져 주어 고마워요.\n\n견학은 담임 선생님께서 학교 이름과 날짜, 인원을 정해 시청 담당 부서로 신청해 주시면 됩니다. 선생님께 꼭 말씀드려 보세요. 기다리고 있을게요."}
 ];
 
 let showAnswers = false;
 const isTeacher = new URLSearchParams(location.search).has('teacher');
+const ANSWER_KEY = '2026';
 if (!isTeacher) document.getElementById('teacherBtn').style.display = 'none';
+else document.getElementById('keyBox').style.display = 'none';
+
+function tryKey() {
+  const v = document.getElementById('keyInput').value.trim();
+  if (v === ANSWER_KEY) {
+    document.getElementById('keyBox').style.display = 'none';
+    document.getElementById('keyMsg').textContent = '';
+    if (!showAnswers) toggleAnswers();
+  } else {
+    document.getElementById('keyMsg').textContent = '열쇠가 맞지 않아요';
+  }
+}
 
 function toggleAnswers() {
   showAnswers = !showAnswers;
