@@ -58,8 +58,6 @@
   <h1>천안시 민원 게시판</h1>
   <p>시민 여러분의 불편을 듣고 함께 해결합니다</p>
   <button id="teacherBtn" onclick="toggleAnswers()">답변 보이기</button>
-  <div id="keyBox"><input id="keyInput" type="password" placeholder="답변 열쇠" onkeydown="if(event.key==='Enter')tryKey()"><button onclick="tryKey()">열기</button></div>
-  <div id="keyMsg"></div>
 </header>
 
 <div class="wrap">
@@ -89,6 +87,7 @@
   </div>
 </div>
 
+<div id="liveMsg" style="text-align:center;font-size:12px;color:#b26a00;margin-top:10px"></div>
 <footer>4학년 사회 수업용으로 만든 게시판입니다.</footer>
 
 <script>
@@ -150,23 +149,16 @@ const posts = [
 
 let showAnswers = false;
 const isTeacher = new URLSearchParams(location.search).has('teacher');
-const ANSWER_KEY = '2026';
 if (!isTeacher) document.getElementById('teacherBtn').style.display = 'none';
-else document.getElementById('keyBox').style.display = 'none';
 
-function tryKey() {
-  const v = document.getElementById('keyInput').value.trim();
-  if (v === ANSWER_KEY) {
-    document.getElementById('keyBox').style.display = 'none';
-    document.getElementById('keyMsg').textContent = '';
-    if (!showAnswers) toggleAnswers();
-  } else {
-    document.getElementById('keyMsg').textContent = '열쇠가 맞지 않아요';
-  }
-}
 
 function toggleAnswers() {
-  showAnswers = !showAnswers;
+  if (window.pushShow) window.pushShow(!showAnswers);
+  else setShow(!showAnswers);
+}
+
+function setShow(v) {
+  showAnswers = !!v;
   const btn = document.getElementById('teacherBtn');
   btn.textContent = showAnswers ? '답변 숨기기' : '답변 보이기';
   btn.classList.toggle('on', showAnswers);
@@ -209,6 +201,28 @@ function showList() {
 }
 
 render();
+</script>
+
+<script type="module">
+const firebaseConfig = {
+  apiKey: "AIzaSyD76lJBLftHmfmhyeu6QWI8zNabkQukVV4",
+  authDomain: "minwonboard.firebaseapp.com",
+  projectId: "minwonboard",
+  storageBucket: "minwonboard.firebasestorage.app",
+  messagingSenderId: "922678238717",
+  appId: "1:922678238717:web:d5ea8dfdd8111251a80d94"
+};
+try {
+  const { initializeApp } = await import("https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js");
+  const { getFirestore, doc, onSnapshot, setDoc } = await import("https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js");
+  const db = getFirestore(initializeApp(firebaseConfig));
+  const ref = doc(db, "minwonBoard", "state");
+  onSnapshot(ref, snap => setShow(snap.exists() && snap.data().showAnswers === true),
+    () => { document.getElementById('liveMsg').textContent = '연결이 끊겼어요. 새로 고침해 주세요.'; });
+  if (isTeacher) window.pushShow = v => setDoc(ref, { showAnswers: v });
+} catch (e) {
+  document.getElementById('liveMsg').textContent = '연결이 끊겼어요. 새로 고침해 주세요.';
+}
 </script>
 </body>
 </html>
